@@ -25,3 +25,4 @@ const uploadoncloudinay = async (localfilepath) =>{
     }
 }
 
+export default cloudinary

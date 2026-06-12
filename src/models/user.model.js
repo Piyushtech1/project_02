@@ -43,14 +43,14 @@ const userSchema = new Schema({
     },
     RefreshTokken:{
         type: String,
-        required: true
+
     }
 },{timestamps:true})
 
-userSchema.pre("save", async function(next){
-    if(!this.isModified("Password")) return next();
-    this.Password = await bcrypt.hash(this.Password, 10)
-    next()
+userSchema.pre("save", async function(){
+    if(!this.isModified("Password")) return;
+    this.Password = await bcrypt.hash(this.Password, 10);
+    // next()
 })
 
 
@@ -83,4 +83,4 @@ userSchema.methods.genraterefreshtoken = function(){
         }
     )
 }
-export const User = mongoose.Model("User",userSchema)
+export const User = mongoose.model("User",userSchema)

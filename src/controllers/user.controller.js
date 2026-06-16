@@ -211,9 +211,120 @@ const refreshaccesstoken = asynchandler(async (req,res)=>
     }
 })
 
+const changecurrentpassword = asynchandler(async (req,res)=>
+{
+    const {oldpassword,newpassword} = req.body
+
+    const user = await User.findById(req.user?._id)
+
+    const ispasswordcorrect = await user.isPasswordCorrect(oldpassword)
+
+    if (!ispasswordcorrect) {
+        throw new ApiError(401,"incorrect password")
+    }
+
+    user.Password = newpassword
+    await user.save({validateBeforeSave: true})
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,{},"password update successfully"))
+})
+
+const getcurrentuser = asynchandler(async (req,res)=>
+{
+    return res.status(200).json(200,req.user,"User get successfully")
+})
+
+const updateaccountdetaile = asynchandler(async(req,res)=>
+{
+    const {fullName, email} = req.body
+
+    if (!fullname && !email) {
+        throw new ApiError(401,"all field are required")
+    }
+
+    const user = User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                fullname,
+                email
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password")
+})
+
+const updateuseravtar = asynchandler(async (req,res)=>
+{
+    const avtarloaclpath = req.file?.path
+
+    if (!avtarloaclpath) {
+        throw new ApiError(401,"avtar path is not found")
+    }
+
+     const avtar = await uploadoncloudinay(avtarloaclpath)
+
+     if (!avtar.url) {
+        throw new ApiError(401,"error on uplouding avtar")
+     }
+
+     await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                avtar: avtar.url
+            }
+        },
+        {
+            new: true
+        }
+     )
+
+     return res
+     .status(200)
+     .json(200,user,"avtar update successfully")
+})
+const updateuserCoverImage = asynchandler(async (req,res)=>
+{
+    const CoverImageloaclpath = req.file?.path
+
+    if (!CoverImageloaclpath) {
+        throw new ApiError(401,"CoverImage path is not found")
+    }
+
+     const CoverImage = await uploadoncloudinay(CoverImageloaclpath)
+
+     if (!CoverImage.url) {
+        throw new ApiError(401,"error on uplouding CoverImage")
+     }
+
+     const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                CoverImage: CoverImage.url
+            }
+        },
+        {
+            new: true
+        }
+     )
+
+     return res
+     .status(200)
+     .json(200,user,"CoverImage update successfully")
+})
 export {
     userregister,
     userlogin,
     logoutuser,
-    refreshaccesstoken
+    refreshaccesstoken,
+    changecurrentpassword,
+    getcurrentuser,
+    updateuseravtar,
+    updateuserCoverImage
 }
